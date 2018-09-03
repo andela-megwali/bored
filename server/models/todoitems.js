@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const TodoItems = sequelize.define('TodoItems', {
+  const TodoItems = sequelize.define('TodoItem', {
     content: {
       type: DataTypes.STRING,
       allowNull: false,
