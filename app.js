@@ -6,6 +6,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get('*', (req, res) => res.status(200).send({ message: 'Bored were we? Now lost' }));
+app.get('*', (req, res) => res.status(200).send({ message: 'Bored were we? Now lost 😁' }));
 
 module.exports = app;
