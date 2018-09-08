@@ -1,68 +1,64 @@
-const TodoItem = require('../models').TodoItem;
+const { TodoItem } = require('../models');
+const { Todo } = require('../models');
+
+const verifyAndProcessRequest = (req, res, processRequest, successAction) => Todo
+  .findById(req.params.todoId)
+  .then(
+    todo => {
+      if (!todo || (todo.userId !== req.decoded.id && !req.decoded.admin)) {
+        return res.status(403).send({ message: 'Forbidden' });
+      }
+
+      return processRequest(req, res, todo, successAction);
+    },
+    err => res.status(400).send(err)
+  );
+
+const processRequest = (req, res, todo, successAction) => TodoItem
+  .findOne({
+    where: {
+      todoId: todo.id,
+      id: req.params.todoItemId,
+    },
+  })
+  .then(
+    todoItem => {
+      if (!todoItem) {
+        return res.status(404).send({ message: 'Not found' });
+      }
+
+      return successAction(todoItem);
+    },
+    err => res.status(400).send(err),
+  );
 
 module.exports = {
   create(req, res) {
-    return TodoItem.create({
-      content: req.body.content,
-      todoId: req.params.todoId,
-    })
-    .then(todoItem => res.status(201).send(todoItem), err => res.status(400).send(err));
-  },
-  list(req, res) {
-    return TodoItem.findAll({
-      where: {
-        todoId: req.params.todoId,
-      },
-    })
-      .then(todoItems => {
-        if (!todoItems) {
-          return res.status(404).send({ message: `No Todo items found on ${req.params.todoId}` });
-        }
+    const createTodoItem = (req, res, todo) => TodoItem
+      .create({
+        content: req.body.content,
+        todoId: todo.id,
+      })
+      .then(todoItem => res.status(201).send(todoItem), err => res.status(400).send(err));
 
-        return res.status(200).send(todoItems)
-      }, err => res.status(400).send(err));
+    verifyAndProcessRequest(req, res, createTodoItem);
   },
   retrieve(req, res) {
-    return TodoItem.find({
-      where: {
-        todoId: req.params.todoId,
-        id: req.params.todoItemId,
-      }
-    }).then(todoItem => {
-      if (!todoItem) {
-        return res.status(404).send({ message: `Todo item ${req.params.todoItemId} not found` });
-      }
-
-      return res.status(200).send(todoItem);
-    }, err => res.status(400).send(err));
+    const sendTodoItem = (todoItem) => res.status(200).send(todoItem);
+    verifyAndProcessRequest(req, res, processRequest, sendTodoItem);
   },
   update(req, res) {
-    return TodoItem.find({
-      where: {
-        todoId: req.params.todoId,
-        id: req.params.todoItemId,
-      }
-    }).then(todoItem => {
-      if (!todoItem) {
-        return res.status(404).send({ message: `Todo item ${req.params.todoItemId} not found` });
-      }
+    const updateTodoItem = (todoItem) => todoItem
+      .update(req.body, { fields: Object.keys(req.body) })
+      .then(() => res.status(200).send(todoItem), err => res.status(400).send(err));
 
-      return todoItem.update(req.body, { fields: Object.keys(req.body) })
-        .then(() => res.status(200).send(todoItem), err => res.status(400).send(err));
-    }, err => res.status(400).send(err));
+    verifyAndProcessRequest(req, res, processRequest, updateTodoItem);
   },
   destroy(req, res) {
-    return TodoItem.find({
-      where: {
-        todoId: req.params.todoId,
-        id: req.params.todoItemId,
-      }
-    }).then(todoItem => {
-      if (!todoItem) {
-        return res.status(404).send({ message: `Todo item ${req.params.todoItemId} not found` });
-      }
+    const destroyTodoItem = (todoItem) => todoItem
+      .destroy()
+      .then(() => res.status(204).send(), err => res.status(400).send(err));
 
-      return todoItem.destroy().then(() => res.status(204).send(), err => res.status(400).send(err));
-    });
+    verifyAndProcessRequest(req, res, processRequest, destroyTodoItem);
   },
 };

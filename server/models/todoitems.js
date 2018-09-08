@@ -1,4 +1,3 @@
-'use strict';
 module.exports = (sequelize, DataTypes) => {
   const TodoItems = sequelize.define('TodoItem', {
     content: {
@@ -8,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     complete: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    }
-  }, {});
+    },
+  });
   TodoItems.associate = (models) => {
     TodoItems.belongsTo(models.Todo, {
       foreignKey: 'todoId',

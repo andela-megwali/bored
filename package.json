@@ -6,12 +6,17 @@
   "author": "Michael <michael.egwali@andela.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon ./bin/www",
-    "sequelize": "./node_modules/.bin/sequelize"
+    "lint:js": "eslint --ignore-path .gitignore --ext .jsx --ext .js .",
+    "start:dev": "NODE_ENV=development nodemon ./bin/www && sequelize db:migrate",
+    "start": "NODE_ENV=production nodemon ./bin/www",
+    "sequelize": "sequelize"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
     "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "morgan": "^1.9.0",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.38.0"
