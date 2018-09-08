@@ -1,8 +1,10 @@
-const jwt = require('jsonwebtoken');
-const env = process.env.NODE_ENV || 'development';
-const config = require(`${__dirname}/../config/config`)[env];
-const { User } = require('../models');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const { User } = require('../models');
+
+const env = process.env.NODE_ENV || 'development';
+const { secret } = require('../config/config')[env];
 
 const authenticateRequest = (req, res, successAction) => {
   const token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -11,7 +13,7 @@ const authenticateRequest = (req, res, successAction) => {
     return res.status(401).send({ message: 'You must be signed in to perform this action' });
   }
 
-  jwt.verify(token, config.secret, (err, decoded) => {
+  jwt.verify(token, secret, (err, decoded) => {
     if (err) {
       return res.status(401).send({ message: 'Invalid Token' });
     }
@@ -39,17 +41,20 @@ const errorMessage = (err) => {
 const getUserToken = (user, res) => {
   const { admin, email, id, issueId, name } = user;
   const payload = { admin, email, id, name };
-  const token = jwt.sign(payload, config.secret, { expiresIn: '1h', issuer: issueId });
+  const token = jwt.sign(payload, secret, { expiresIn: '1h', issuer: issueId });
   return res.status(201).send({ token, user: payload });
 };
 
 module.exports = {
   signup(req, res) {
+    const saltRounds = 10;
+    const hashedPassword = bcrypt.hashSync(req.body.password, saltRounds);
+
     return User.create({
       email: req.body.email,
       issueId: crypto.randomBytes(16).toString('hex'),
       name: req.body.name,
-      password: req.body.password,
+      password: hashedPassword,
     })
     .then(
       user => getUserToken(user, res),
@@ -62,7 +67,9 @@ module.exports = {
         email: req.body.email,
       },
     }).then((user) => {
-      if (!user || user.password !== req.body.password) {
+      const hashedPassword = user && user.password;
+
+      if (!user || !bcrypt.compareSync(req.body.password, hashedPassword)) {
         return res.status(401).send({ message: 'Invalid credentials' });
       }
 

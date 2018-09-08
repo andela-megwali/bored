@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { User } = require('../models');
 
 const checkActionPermission = (user, req, res) => {
@@ -45,7 +46,12 @@ module.exports = {
 
         // Users cannot change their own admin status only other admins can
         if (req.decoded.id === user.id) {
-          fields = fields.filter(f => (f !== admin && f !== issueId));
+          fields = fields.filter(f => (f !== 'admin' && f !== 'issueId'));
+        }
+
+        if (req.body.password) {
+          const saltRounds = 10;
+          req.body.password = bcrypt.hashSync(req.body.password, saltRounds);
         }
 
         return user.update(req.body, { fields })
