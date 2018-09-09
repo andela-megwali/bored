@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const { encryptPassword, generateIssueId } = require('../util');
 const { User } = require('../models');
 
 const checkActionPermission = (user, req, res) => {
@@ -50,8 +50,7 @@ module.exports = {
         }
 
         if (req.body.password) {
-          const saltRounds = 10;
-          req.body.password = bcrypt.hashSync(req.body.password, saltRounds);
+          req.body.password = encryptPassword(req.body.password);
         }
 
         return user.update(req.body, { fields })
@@ -64,5 +63,30 @@ module.exports = {
         checkActionPermission(user, req, res);
         return user.destroy().then(() => res.status(204).send(), err => res.status(400).send(err));
       });
+  },
+  logout(req, res) {
+    if (req.params.userId && req.decoded.admin) {
+      return User.findById(req.params.userId)
+      .then((user) => {
+        if (!user) {
+          return res.status(404).send({ message: 'User not found' });
+        }
+
+        user.update({ issueId: generateIssueId() })
+          .then(
+            () => res.status(200).send({ message: `Logout of user ${user.id} successful` }),
+            () => res.status(500).send({ message: 'Server error' })
+          );
+      }, () => res.status(500).send({ message: 'Server error' }));
+    }
+
+    return User.findById(req.decoded.id)
+    .then((user) => {
+      user.update({ issueId: generateIssueId() })
+        .then(
+          () => res.status(200).send({ message: `Logout successful` }),
+          () => res.status(500).send({ message: 'Server error' })
+        );
+    }, () => res.status(500).send({ message: 'Server error' }));
   },
 };
