@@ -11,14 +11,14 @@ const todoItemSchema = Joi.object().keys({
 });
 
 const todoSchema = Joi.object().keys({
-  title: Joi.string().alphanum().min(2).max(100).required(),
+  title: Joi.string().alphanum().max(100).required(),
 });
 
 const userSchema = Joi.object().keys({
   admin: Joi.boolean(),
   email: Joi.string().email().lowercase().required(),
   issueId: Joi.string().hex().length(32),
-  name: Joi.string().alphanum().min(2).max(30).required(),
+  name: Joi.string().alphanum().max(30).required(),
   password: Joi.string().min(8).required(),
 });
 

@@ -1,21 +1,14 @@
-const { decryptPassword, encryptPassword, generateIssueId } = require('../util');
-const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-
-const env = process.env.NODE_ENV || 'development';
-const { secret } = require('../config/config')[env];
+const {
+  decryptPassword,
+  encryptPassword,
+  generateIssueId,
+  generateUserToken
+} = require('../util');
 
 const errorMessage = (err) => {
   const error = err.errors.find(e => e.path);
-
-  return { message: `Bad Request${error ? `, check ${error.path} field` : '' }`}
-};
-
-const getUserToken = (user, res) => {
-  const { admin, email, id, issueId, name } = user;
-  const payload = { admin, email, id, name };
-  const token = jwt.sign(payload, secret, { expiresIn: '1h', issuer: issueId });
-  return res.status(201).send({ token, user: payload });
+  return { message: `Bad Request${error ? `, check ${error.path} field` : '' }`};
 };
 
 module.exports = {
@@ -27,7 +20,7 @@ module.exports = {
       password: encryptPassword(req.body.password),
     })
     .then(
-      user => getUserToken(user, res),
+      user => res.status(201).send(generateUserToken(user)),
       err => res.status(400).send(errorMessage(err)),
     );
   },
@@ -36,14 +29,18 @@ module.exports = {
       where: {
         email: req.body.email,
       },
-    }).then((user) => {
-      const hashedPassword = user && user.password;
+    })
+    .then(
+      (user) => {
+        const hashedPassword = user && user.password;
 
-      if (!user || !decryptPassword(req.body.password, hashedPassword)) {
-        return res.status(401).send({ message: 'Invalid credentials' });
-      }
+        if (!user || !decryptPassword(req.body.password, hashedPassword)) {
+          return res.status(401).send({ message: 'Invalid credentials' });
+        }
 
-      getUserToken(user, res);
-    }, () => res.status(500).send({ message: 'Bad request' }));
+        res.status(201).send(generateUserToken(user))
+      },
+      err => res.status(400).send(errorMessage(err)),
+    );
   },
 };

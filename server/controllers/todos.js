@@ -6,7 +6,7 @@ const checkActionPermission = (todo, req, res) => {
     return res.status(404).send({ message: 'Not found' });
   }
 
-  if (todo.userId !== req.decoded.id && !req.decoded.admin) {
+  if (todo.userId !== req.currentUser.id && !req.currentUser.admin) {
     return res.status(403).send({ message: 'Forbidden' });
   }
 };
@@ -15,14 +15,14 @@ module.exports = {
   create(req, res) {
     return Todo.create({
       title: req.body.title,
-      userId: req.decoded.id,
+      userId: req.currentUser.id,
     })
     .then(todo => res.status(201).send(todo), () => res.status(400).send({ message: 'Bad request' }));
   },
   list(req, res) {
     return Todo.findAll({
       where: {
-        userId: req.decoded.id,
+        userId: req.currentUser.id,
       },
       include: [{
         model: TodoItem,

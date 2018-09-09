@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const Schemas = require('./validationSchemas');
+const Schemas = require('../routes/validationSchemas');
 
 const supportedMethods = ['post', 'put'];
 
@@ -16,7 +16,9 @@ module.exports = (req, res, next) => {
       }
 
       req.body = data;
-      next();
+      return next();
     });
   }
+
+  return res.status(422).send({ error: 'Unsupported request' });
 };

@@ -1,19 +1,15 @@
 const { encryptPassword, generateIssueId } = require('../util');
 const { User } = require('../models');
 
-const checkActionPermission = (user, req, res) => {
+const confirmUserExists = (res, user) => {
   if (!user) {
     return res.status(404).send({ message: 'User not found' });
   }
-
-  if (!req.decoded.admin && req.decoded.id !== user.id) {
-    return res.status(403).send({ message: 'Forbidden' });
-  }
-}
+};
 
 module.exports = {
   list(req, res) {
-    if (!req.decoded.admin) {
+    if (!req.currentUser.admin) {
       return res.status(403).send({ message: 'Forbidden' });
     }
 
@@ -29,48 +25,72 @@ module.exports = {
       }, err => res.status(400).send(err));
   },
   retrieve(req, res) {
-    return User.findById(req.params.userId, { attributes: ['email', 'id', 'name'] })
-      .then((user) => {
-        if (!user) {
-          return res.status(404).send({ message: 'User not found' });
-        }
+    const attributes = ['email', 'id', 'name'];
 
+    if (req.currentUser.id === +req.params.userId) {
+      const user = {};
+      attributes.forEach(attr => (user[attr] = req.currentUser[attr]));
+
+      return res.status(200).send(user);
+    }
+
+    return User.findById(req.params.userId, { attributes })
+      .then((user) => {
+        confirmUserExists(res, user);
         return res.status(200).send(user);
       }, err => res.status(400).send(err));
   },
   update(req, res) {
-    return User.findById(req.params.userId).
-      then((user) => {
-        checkActionPermission(user, req, res);
-        let fields = Object.keys(req.body);
+    const updateUser = (req, res, user, fields) => {
+      if (req.body.password) {
+        req.body.password = encryptPassword(req.body.password);
+      }
 
-        // Users cannot change their own admin status only other admins can
-        if (req.decoded.id === user.id) {
-          fields = fields.filter(f => (f !== 'admin' && f !== 'issueId'));
-        }
+      return user.update(req.body, { fields })
+        .then(() => res.status(200).send({ id: user.id }), err => res.status(400).send(err));
+    };
 
-        if (req.body.password) {
-          req.body.password = encryptPassword(req.body.password);
-        }
+    if (+req.params.userId !== req.currentUser.id) {
+      if (req.currentUser.admin) {
+        return User.findById(req.params.userId)
+        .then((user) => {
+          confirmUserExists(res, user);
 
-        return user.update(req.body, { fields })
-          .then(() => res.status(200).send({ id: user.id }), err => res.status(400).send(err));
-      }, err => res.status(400).send(err));
+          const fields = Object.keys(req.body).filter(f => f !== 'issueId');
+          updateUser(req, res, user, fields);
+        }, err => res.status(400).send(err));
+      }
+
+      return res.status(403).send({ message: 'Forbidden' });
+    }
+
+    // Users cannot change their own admin status only other admins can
+    const fields = Object.keys(req.body).filter(f => (f !== 'admin' && f !== 'issueId'));
+    updateUser(req, res, user, fields);
   },
   destroy(req, res) {
-    return User.findById(req.params.userId)
-      .then((user) => {
-        checkActionPermission(user, req, res);
-        return user.destroy().then(() => res.status(204).send(), err => res.status(400).send(err));
-      });
+    if (+req.params.userId !== req.currentUser.id) {
+      if (req.currentUser.admin) {
+        return User.findById(req.params.userId)
+        .then((user) => {
+          confirmUserExists(res, user);
+
+          return user.destroy()
+          .then(() => res.status(204).send(), err => res.status(400).send(err));
+        }, err => res.status(500).send(err));
+      }
+
+      return res.status(403).send({ message: 'Forbidden' });
+    }
+
+    return req.currentUser.destroy()
+    .then(() => res.status(204).send(), err => res.status(400).send(err));
   },
   logout(req, res) {
-    if (req.params.userId && req.decoded.admin) {
+    if (req.params.userId && req.currentUser.admin && req.currentUser.id !== +req.params.userId) {
       return User.findById(req.params.userId)
       .then((user) => {
-        if (!user) {
-          return res.status(404).send({ message: 'User not found' });
-        }
+        confirmUserExists(res, user);
 
         user.update({ issueId: generateIssueId() })
           .then(
@@ -80,13 +100,10 @@ module.exports = {
       }, () => res.status(500).send({ message: 'Server error' }));
     }
 
-    return User.findById(req.decoded.id)
-    .then((user) => {
-      user.update({ issueId: generateIssueId() })
-        .then(
-          () => res.status(200).send({ message: `Logout successful` }),
-          () => res.status(500).send({ message: 'Server error' })
-        );
-    }, () => res.status(500).send({ message: 'Server error' }));
+    return req.currentUser.update({ issueId: generateIssueId() })
+    .then(
+      () => res.status(200).send({ message: `Logout successful` }),
+      () => res.status(500).send({ message: 'Server error' })
+    );
   },
 };

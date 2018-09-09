@@ -5,7 +5,7 @@ const verifyAndProcessRequest = (req, res, processRequest, successAction) => Tod
   .findById(req.params.todoId)
   .then(
     todo => {
-      if (!todo || (todo.userId !== req.decoded.id && !req.decoded.admin)) {
+      if (!todo || (todo.userId !== req.currentUser.id && !req.currentUser.admin)) {
         return res.status(403).send({ message: 'Forbidden' });
       }
 

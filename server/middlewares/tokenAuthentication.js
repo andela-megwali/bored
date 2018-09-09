@@ -11,12 +11,12 @@ const authenticateRequest = (req, res, next) => {
     return res.status(401).send({ message: 'You must be signed in to perform this action' });
   }
 
-  jwt.verify(token, secret, (err, decoded) => {
+  return jwt.verify(token, secret, (err, decoded) => {
     if (err) {
       return res.status(401).send({ message: 'Invalid Token' });
     }
 
-    User.findById(decoded.id)
+    return User.findById(decoded.id)
       .then(
         (user) => {
           if (!user) {
@@ -27,9 +27,8 @@ const authenticateRequest = (req, res, next) => {
             return res.status(401).send({ message: 'User is logged out' });
           }
 
-          req.decoded = decoded; // remove
-          req.decodedUser = user;
-          next();
+          req.currentUser = user;
+          return next();
         },
         () => res.status(500).send({ message: 'Server error' }),
       );
