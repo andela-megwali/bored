@@ -1,8 +1,9 @@
 const authController = require('../controllers').auth;
+const SchemaValidator = require('./SchemaValidator');
 
 module.exports = (app) => {
-  app.post('/api/signup', authController.signup);
-  app.post('/api/login', authController.login);
+  app.post('/api/signup', SchemaValidator, authController.signup);
+  app.post('/api/login', SchemaValidator, authController.login);
   app.use('/api', authController.authenticate);
-  app.post('/api/logout', authController.login);
+  app.get('/api/logout', authController.login);
 };
