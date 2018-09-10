@@ -28,9 +28,12 @@ module.exports = {
         model: TodoItem,
         as: 'todoItems',
       }],
-    }).then(todos =>
-      todos ? res.status(200).send(todos) : res.status(404).send({ message: 'Not found' }),
-      err => res.status(400).send(err)
+    })
+    .then(
+      todos => (
+        todos ? res.status(200).send(todos) : res.status(404).send({ message: 'Not found' })
+      ),
+      err => res.status(400).send(err),
     );
   },
   retrieve(req, res) {
@@ -40,7 +43,7 @@ module.exports = {
         as: 'todoItems',
       }],
     })
-    .then(todo => {
+    .then((todo) => {
       checkActionPermission(todo, req, res);
       return res.status(200).send(todo);
     }, () => res.status(400).send({ message: 'Bad request' }));
@@ -48,22 +51,22 @@ module.exports = {
   update(req, res) {
     return Todo.findById(req.params.todoId)
     .then(
-      todo => {
+      (todo) => {
         checkActionPermission(todo, req, res);
         return todo.update(req.body, { fields: Object.keys(req.body) })
         .then(() => res.status(200).send(todo), err => res.status(400).send(err));
       },
-      err => res.status(400).send(err)
+      err => res.status(400).send(err),
     );
   },
   destroy(req, res) {
     return Todo.findById(req.params.todoId)
     .then(
-      todo => {
+      (todo) => {
         checkActionPermission(todo, req, res);
         return todo.destroy().then(() => res.status(204).send(), err => res.status(400).send(err));
       },
-      err => res.status(400).send(err)
+      err => res.status(400).send(err),
     );
   },
 };

@@ -29,7 +29,9 @@ module.exports = {
 
     if (req.currentUser.id === +req.params.userId) {
       const user = {};
-      attributes.forEach(attr => (user[attr] = req.currentUser[attr]));
+      attributes.forEach((attr) => {
+        user[attr] = req.currentUser[attr];
+      });
 
       return res.status(200).send(user);
     }
@@ -41,7 +43,7 @@ module.exports = {
       }, err => res.status(400).send(err));
   },
   update(req, res) {
-    const updateUser = (req, res, user, fields) => {
+    const updateUser = (user, fields) => {
       if (req.body.password) {
         req.body.password = encryptPassword(req.body.password);
       }
@@ -60,7 +62,7 @@ module.exports = {
           confirmUserExists(res, user);
 
           const fields = Object.keys(req.body).filter(f => f !== 'issueId');
-          updateUser(req, res, user, fields);
+          updateUser(user, fields);
         }, err => res.status(400).send(err));
       }
 
@@ -69,7 +71,7 @@ module.exports = {
 
     // Users cannot change their own admin status only other admins can
     const fields = Object.keys(req.body).filter(f => (f !== 'admin' && f !== 'issueId'));
-    updateUser(req, res, req.currentUser, fields);
+    updateUser(req.currentUser, fields);
   },
   destroy(req, res) {
     if (+req.params.userId !== req.currentUser.id) {
@@ -98,15 +100,15 @@ module.exports = {
         user.update({ issueId: generateIssueId() })
           .then(
             () => res.status(200).send({ message: `Logout of user ${user.id} successful` }),
-            () => res.status(500).send({ message: 'Server error' })
+            () => res.status(500).send({ message: 'Server error' }),
           );
       }, () => res.status(500).send({ message: 'Server error' }));
     }
 
     return req.currentUser.update({ issueId: generateIssueId() })
     .then(
-      () => res.status(200).send({ message: `Logout successful` }),
-      () => res.status(500).send({ message: 'Server error' })
+      () => res.status(200).send({ message: 'Logout successful' }),
+      () => res.status(500).send({ message: 'Server error' }),
     );
   },
 };

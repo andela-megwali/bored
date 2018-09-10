@@ -1,6 +1,6 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('TodoItems', {
+  up: (queryInterface, Sequelize) => (
+    queryInterface.createTable('TodoItems', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -28,13 +28,10 @@ module.exports = {
         references: {
           model: 'Todos',
           key: 'id',
-          as: 'todoId'
+          as: 'todoId',
         },
         type: Sequelize.INTEGER,
       },
-    });
-  },
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('TodoItems');
-  }
+    })),
+  down: queryInterface => queryInterface.dropTable('TodoItems'),
 };
