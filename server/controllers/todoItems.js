@@ -4,17 +4,17 @@ const { Todo } = require('../models');
 const verifyAndProcessRequest = (req, res, processRequest, successAction) => Todo
   .findById(req.params.todoId)
   .then(
-    todo => {
+    (todo) => {
       if (!todo || (todo.userId !== req.currentUser.id && !req.currentUser.admin)) {
         return res.status(403).send({ message: 'Forbidden' });
       }
 
-      return processRequest(req, res, todo, successAction);
+      return processRequest(todo, req, res, successAction);
     },
-    err => res.status(400).send(err)
+    err => res.status(400).send(err),
   );
 
-const processRequest = (req, res, todo, successAction) => TodoItem
+const processRequest = (todo, req, res, successAction) => TodoItem
   .findOne({
     where: {
       todoId: todo.id,
@@ -22,7 +22,7 @@ const processRequest = (req, res, todo, successAction) => TodoItem
     },
   })
   .then(
-    todoItem => {
+    (todoItem) => {
       if (!todoItem) {
         return res.status(404).send({ message: 'Not found' });
       }
@@ -34,7 +34,7 @@ const processRequest = (req, res, todo, successAction) => TodoItem
 
 module.exports = {
   create(req, res) {
-    const createTodoItem = (req, res, todo) => TodoItem
+    const createTodoItem = todo => TodoItem
       .create({
         content: req.body.content,
         todoId: todo.id,
@@ -44,18 +44,18 @@ module.exports = {
     verifyAndProcessRequest(req, res, createTodoItem);
   },
   retrieve(req, res) {
-    const sendTodoItem = (todoItem) => res.status(200).send(todoItem);
+    const sendTodoItem = todoItem => res.status(200).send(todoItem);
     verifyAndProcessRequest(req, res, processRequest, sendTodoItem);
   },
   update(req, res) {
-    const updateTodoItem = (todoItem) => todoItem
+    const updateTodoItem = todoItem => todoItem
       .update(req.body, { fields: Object.keys(req.body) })
       .then(() => res.status(200).send(todoItem), err => res.status(400).send(err));
 
     verifyAndProcessRequest(req, res, processRequest, updateTodoItem);
   },
   destroy(req, res) {
-    const destroyTodoItem = (todoItem) => todoItem
+    const destroyTodoItem = todoItem => todoItem
       .destroy()
       .then(() => res.status(204).send(), err => res.status(400).send(err));
 

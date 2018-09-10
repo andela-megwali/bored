@@ -47,7 +47,10 @@ module.exports = {
       }
 
       return user.update(req.body, { fields })
-        .then(() => res.status(200).send({ id: user.id }), err => res.status(400).send(err));
+      .then(
+        () => res.status(200).send({ message: 'User Updated' }),
+        err => res.status(400).send(err),
+      );
     };
 
     if (+req.params.userId !== req.currentUser.id) {
@@ -66,7 +69,7 @@ module.exports = {
 
     // Users cannot change their own admin status only other admins can
     const fields = Object.keys(req.body).filter(f => (f !== 'admin' && f !== 'issueId'));
-    updateUser(req, res, user, fields);
+    updateUser(req, res, req.currentUser, fields);
   },
   destroy(req, res) {
     if (+req.params.userId !== req.currentUser.id) {

@@ -5,14 +5,14 @@ module.exports = {
     'database': 'd3-practice1-todo',
     'host': process.env.DEV_HOST,
     'dialect': 'postgres',
-    'secret': process.env.DEV_SECRET
+    'secret': process.env.DEV_SECRET,
   },
   'test': {
     'username': 'enigma',
     'password': null,
     'database': 'database_test',
     'host': '127.0.0.1',
-    'dialect': 'postgres'
+    'dialect': 'postgres',
   },
   'production': {
     'username': process.env.DEV_DB_USERNAME,
@@ -20,6 +20,6 @@ module.exports = {
     'database': process.env.DEV_DB,
     'host': process.env.DEV_HOST,
     'dialect': 'postgres',
-    'secret': process.env.DEV_SECRET
-  }
+    'secret': process.env.DEV_SECRET,
+  },
 };

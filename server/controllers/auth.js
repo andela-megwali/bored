@@ -3,12 +3,12 @@ const {
   decryptPassword,
   encryptPassword,
   generateIssueId,
-  generateUserToken
+  generateUserToken,
 } = require('../util');
 
 const errorMessage = (err) => {
   const error = err.errors.find(e => e.path);
-  return { message: `Bad Request${error ? `, check ${error.path} field` : '' }`};
+  return { message: `Bad Request${error ? `, check ${error.path} field` : ''}` };
 };
 
 module.exports = {
@@ -38,7 +38,7 @@ module.exports = {
           return res.status(401).send({ message: 'Invalid credentials' });
         }
 
-        res.status(201).send(generateUserToken(user))
+        return res.status(201).send(generateUserToken(user));
       },
       err => res.status(400).send(errorMessage(err)),
     );

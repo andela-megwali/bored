@@ -10,7 +10,7 @@ module.exports = (app) => {
   auth(app);
 
   // Authentication middleware
-  app.use('/api', authenticateRequest);
+  app.use(authenticateRequest);
 
   // Protected routes
   todos(app);
