@@ -4,7 +4,7 @@ const { User } = require('../models');
 const env = process.env.NODE_ENV || 'development';
 const { secret } = require('../config/config')[env];
 
-const authenticateRequest = (req, res, next) => {
+module.exports = (req, res, next) => {
   const token = req.body.token || req.query.token || req.headers['x-access-token'] || req.headers.authorization;
 
   if (!token) {
@@ -33,8 +33,4 @@ const authenticateRequest = (req, res, next) => {
       () => res.status(500).send({ message: 'Server error' }),
     );
   });
-};
-
-module.exports = {
-  authenticateRequest,
 };
