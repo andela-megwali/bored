@@ -33,11 +33,11 @@ const userUpdateSchema = Joi.object().keys({
 });
 
 module.exports = {
-  '/api/login': authSchema,
-  '/api/signup': userSignupSchema,
-  '/api/todos': todoSchema,
-  '/api/todos/:todoId': todoSchema,
-  '/api/todos/:todoId/todoItems': todoItemCreateSchema,
-  '/api/todos/:todoId/todoItems/:todoItemId': todoItemUpdateSchema,
-  '/api/users/:userId': userUpdateSchema,
+  '/api/v1/login': authSchema,
+  '/api/v1/signup': userSignupSchema,
+  '/api/v1/todos': todoSchema,
+  '/api/v1/todos/:todoId': todoSchema,
+  '/api/v1/todos/:todoId/todoItems': todoItemCreateSchema,
+  '/api/v1/todos/:todoId/todoItems/:todoItemId': todoItemUpdateSchema,
+  '/api/v1/users/:userId': userUpdateSchema,
 };

@@ -1,7 +1,0 @@
-const authController = require('../controllers').auth;
-const SchemaValidator = require('../middlewares/SchemaValidator');
-
-module.exports = (app) => {
-  app.post('/api/signup', SchemaValidator, authController.signup);
-  app.post('/api/login', SchemaValidator, authController.login);
-};

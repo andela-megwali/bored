@@ -9,7 +9,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan('dev'));
-routes(app);
-app.get('*', (req, res) => res.status(200).send({ message: 'Bored were we? Now lost 😁' }));
+routes.v1(app);
+app.all('*', (req, res) => res.status(404).send({ message: 'Bored were we? Now lost 😁' }));
 
 module.exports = app;
