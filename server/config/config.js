@@ -13,6 +13,7 @@ module.exports = {
     'database': 'database_test',
     'host': '127.0.0.1',
     'dialect': 'postgres',
+    'secret': 'abcdefg',
   },
   'production': {
     'username': process.env.DEV_DB_USERNAME,
