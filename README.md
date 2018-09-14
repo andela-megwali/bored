@@ -1,4 +1,4 @@
-# bored
+# Bored
 Basic Todo Api with authentication
 
 Clone repo
@@ -6,7 +6,7 @@ yarn install
 
 create a .env file with the following keys:
 
-DEV_DB=
+```DEV_DB=
 DEV_DB_USERNAME=
 DEV_DB_PASSWORD=
 DEV_HOST=127.0.0.1
@@ -16,7 +16,7 @@ DEV_SECRET=
 yarn start:dev to run in dev mode
 yarn test to run test
 
-Endpoints:
+## Endpoints:
 
 Faffing: get '/api/v1'
 signup: post '/api/v1/signup'
@@ -39,6 +39,6 @@ get todoItem: get('/api/v1/todos/:todoId/todoItems/:todoItemId'
 update todoItem: put('/api/v1/todos/:todoId/todoItems/:todoItemId'
 delete todoItem: delete('/api/v1/todos/:todoId/todoItems/:todoItemId'
 
-Note:
+## Note:
 You need to update db directly to create the first admin user. Only an admin can elevate another user to admin status.
 Admins are authorised to run any account.
