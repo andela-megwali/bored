@@ -1,12 +1,6 @@
 const { encryptPassword, generateIssueId } = require('../util');
 const { User } = require('../models');
 
-const confirmUserExists = (res, user) => {
-  if (!user) {
-    return res.status(404).send({ message: 'User not found' });
-  }
-};
-
 module.exports = {
   list(req, res) {
     if (!req.currentUser.admin) {
@@ -38,7 +32,10 @@ module.exports = {
 
     return User.findById(req.params.userId, { attributes })
       .then((user) => {
-        confirmUserExists(res, user);
+        if (!user) {
+          return res.status(404).send({ message: 'User not found' });
+        }
+
         return res.status(200).send(user);
       }, err => res.status(400).send(err));
   },
@@ -59,7 +56,9 @@ module.exports = {
       if (req.currentUser.admin) {
         return User.findById(req.params.userId)
         .then((user) => {
-          confirmUserExists(res, user);
+          if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+          }
 
           const fields = Object.keys(req.body).filter(f => f !== 'issueId');
           updateUser(user, fields);
@@ -78,7 +77,9 @@ module.exports = {
       if (req.currentUser.admin) {
         return User.findById(req.params.userId)
         .then((user) => {
-          confirmUserExists(res, user);
+          if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+          }
 
           return user.destroy()
           .then(() => res.status(204).send(), err => res.status(400).send(err));
@@ -95,7 +96,9 @@ module.exports = {
     if (req.params.userId && req.currentUser.admin && req.currentUser.id !== +req.params.userId) {
       return User.findById(req.params.userId)
       .then((user) => {
-        confirmUserExists(res, user);
+        if (!user) {
+          return res.status(404).send({ message: 'User not found' });
+        }
 
         user.update({ issueId: generateIssueId() })
           .then(

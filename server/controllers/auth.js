@@ -38,7 +38,7 @@ module.exports = {
           return res.status(401).send({ message: 'Invalid credentials' });
         }
 
-        return res.status(201).send(generateUserToken(user));
+        return res.status(200).send(generateUserToken(user));
       },
       err => res.status(400).send(errorMessage(err)),
     );

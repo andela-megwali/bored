@@ -11,9 +11,12 @@
     "start": "NODE_ENV=production nodemon ./bin/www",
     "sequelize": "sequelize",
     "test:createDB": "NODE_ENV=test dropdb --if-exists database_test && NODE_ENV=test createdb database_test",
-    "test": "yarn test:createDB && yarn lint:js && NODE_ENV=test sequelize db:migrate && mocha"
+    "test": "yarn test:createDB && yarn lint:js && NODE_ENV=test sequelize db:migrate && NODE_ENV=test PORT=4001 nyc --reporter=text mocha --exit"
   },
-  "eslintIgnore": ["*.test.js", ".gitignore"],
+  "eslintIgnore": [
+    "*.test.js",
+    ".gitignore"
+  ],
   "dependencies": {
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
@@ -36,6 +39,7 @@
     "eslint-plugin-react": "^7.11.1",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.4",
+    "nyc": "^13.0.1",
     "sequelize-cli": "^4.1.1",
     "supertest": "^3.3.0"
   }
