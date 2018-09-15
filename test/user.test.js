@@ -189,6 +189,7 @@ module.exports = () => {
         .send({
           token: adminToken,
           name: 'admin changed name',
+          password: 'new password',
         })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -205,6 +206,21 @@ module.exports = () => {
             expect(res.body.name).to.equal('admin changed name');
             done();
           });
+        });
+      });
+
+      it('Should return 404 if admins try to update a user that does not exist', (done) => {
+        request(app).put('/api/v1/users/100')
+        .send({
+          token: adminToken,
+          name: 'admin changed name',
+          password: 'new password',
+        })
+        .end((err, res) => {
+          expect(res.status).to.equal(404);
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.include('User not found');
+          done();
         });
       });
     });

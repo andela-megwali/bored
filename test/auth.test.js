@@ -13,7 +13,7 @@ module.exports = () => {
     after((done) => {
       db.User.findOne({
         where: {
-          email: 'user@test.com',
+          email: 'auth@test.com',
         },
       })
       .then(
@@ -25,7 +25,7 @@ module.exports = () => {
     it('Should not create a user when any required field is invalid', (done) => {
       request(app).post('/api/v1/signup')
       .send({
-        email: 'user@test.com',
+        email: 'auth@test.com',
         name: '',
         password: '123qw',
       })
@@ -41,7 +41,7 @@ module.exports = () => {
       request(app).post('/api/v1/signup')
       .send({
         admin: true,
-        email: 'user@test.com',
+        email: 'auth@test.com',
         name: 'qwert',
         password: '123qwdfghjk',
       })
@@ -51,7 +51,7 @@ module.exports = () => {
         expect(res.body).to.have.all.keys('token', 'user');
         expect(res.body.user).to.have.all.keys('admin', 'email', 'id', 'name');
         expect(res.body.user.admin).to.equal(false);
-        expect(res.body.user.email).to.equal('user@test.com');
+        expect(res.body.user.email).to.equal('auth@test.com');
         done();
       });
     });
