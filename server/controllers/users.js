@@ -10,19 +10,21 @@ module.exports = {
     return User.findAll({
       attributes: { exclude: ['password', 'issueId'] },
     })
-      .then((users) => {
-        if (!users) {
-          return res.status(404).send({ message: 'No users found' });
-        }
-
-        return res.status(200).send(users);
-      }, err => res.status(400).send(err));
+    .then(
+      users => res.status(200).send(users),
+      err => res.status(400).send(err),
+    );
   },
   retrieve(req, res) {
     const attributes = ['email', 'id', 'name'];
 
+    if (req.currentUser.admin || req.currentUser.id === +req.params.userId) {
+      attributes.push('admin');
+    }
+
     if (req.currentUser.id === +req.params.userId) {
       const user = {};
+
       attributes.forEach((attr) => {
         user[attr] = req.currentUser[attr];
       });

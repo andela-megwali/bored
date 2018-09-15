@@ -99,7 +99,7 @@ module.exports = () => {
       });
     });
 
-    it('Should should access unprotected routes without authentication', (done) => {
+    it('Should access unprotected routes without authentication', (done) => {
       request(app).get('/api/v1')
       .end((err, res) => {
         expect(res.status).to.equal(200);
@@ -109,7 +109,7 @@ module.exports = () => {
       });
     });
 
-    it('Should should not access protected routes without authentication', (done) => {
+    it('Should not access protected routes without authentication', (done) => {
       request(app).get('/api/v1/users/1')
       .end((err, res) => {
         expect(res.status).to.equal(401);
@@ -119,7 +119,7 @@ module.exports = () => {
       });
     });
 
-    it('Should should not access protected routes with invalid authentication token', (done) => {
+    it('Should not access protected routes with invalid authentication token', (done) => {
       request(app).get('/api/v1/users/1')
       .send({
         token: 'Invalid_token',
@@ -132,14 +132,15 @@ module.exports = () => {
       });
     });
 
-    it('Should should access protected routes with valid authentication token', (done) => {
+    it('Should access protected routes with valid authentication token', (done) => {
       request(app).get('/api/v1/users/1')
       .send({
         token,
       })
       .end((err, res) => {
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.all.keys('email', 'id', 'name');
+        expect(res.body).to.have.property('email');
+        expect(res.body).to.have.property('name');
         done();
       });
     });
