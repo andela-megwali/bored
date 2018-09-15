@@ -122,7 +122,7 @@ module.exports = () => {
       });
 
       it('Should return 404 when user does not exist', (done) => {
-        request(app).get('/api/v1/users/10')
+        request(app).get('/api/v1/users/100')
         .send({
           token: userToken,
         })

@@ -240,7 +240,7 @@ module.exports = () => {
         request(app).put(`/api/v1/todos/${adminTodoId}`)
         .send({
           title: '',
-          token: userToken,
+          token: adminToken,
         })
         .end((err, res) => {
           expect(res.status).to.equal(422);
@@ -315,7 +315,7 @@ module.exports = () => {
         });
       });
 
-      it('Should return 404 to authorized users for to id not found', (done) => {
+      it('Should return 404 to authorized users for todo id not found', (done) => {
         request(app).delete('/api/v1/todos/100')
         .send({
           token: adminToken,
