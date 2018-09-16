@@ -37,18 +37,6 @@ module.exports = () => {
       });
     });
 
-    after((done) => {
-      db.User.findOne({
-        where: {
-          email: 'user@test.com',
-        },
-      })
-      .then(
-        user => user.destroy().then(done()),
-        err => done(err),
-      );
-    });
-
     describe('Listing Users', () => {
       it('Should not list all users to a regular user', (done) => {
         request(app).get('/api/v1/users')
@@ -71,10 +59,8 @@ module.exports = () => {
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).to.be.an('array');
-          expect(res.body).to.have.lengthOf(2);
           expect(res.body[0]).to.have.all.keys('admin', 'createdAt', 'email', 'id', 'name', 'updatedAt');
           expect(res.body[0].email).to.equal('admin@test.com');
-          expect(res.body[1].email).to.equal('user@test.com');
           done();
         });
       });
@@ -136,6 +122,24 @@ module.exports = () => {
     });
 
     describe('Updating a user', () => {
+      let upgradedUserId;
+      let upgradedUserToken;
+
+      before((done) => {
+        // Create another regular user
+        request(app).post('/api/v1/signup')
+        .send({
+          email: 'upgradedUser@test.com',
+          name: 'Upgrade',
+          password: '123qwdfghjk',
+        })
+        .end((err, res) => {
+          upgradedUserId = res.body.user.id;
+          upgradedUserToken = res.body.token;
+          done();
+        });
+      });
+
       it('Should allow update of a users personal details', (done) => {
         request(app).put(`/api/v1/users/${userId}`)
         .send({
@@ -160,6 +164,58 @@ module.exports = () => {
         });
       });
 
+      it('Should ignore update of a user admin status', (done) => {
+        request(app).put(`/api/v1/users/${upgradedUserId}`)
+        .send({
+          admin: true,
+          name: 'self upgrade failed',
+          token: upgradedUserToken,
+        })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.include('User Updated');
+
+          request(app).get(`/api/v1/users/${upgradedUserId}`)
+          .send({
+            token: upgradedUserToken,
+          })
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body.name).to.equal('self upgrade failed');
+            expect(res.body.admin).to.equal(false);
+            done();
+          });
+        });
+      });
+
+      it('Should allow admins update any personal details of other users', (done) => {
+        request(app).put(`/api/v1/users/${upgradedUserId}`)
+        .send({
+          admin: true,
+          name: 'new admin upgrade',
+          password: 'new password',
+          token: adminToken,
+        })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.include('User Updated');
+
+          request(app).get(`/api/v1/users/${upgradedUserId}`)
+          .send({
+            token: upgradedUserToken,
+          })
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body).to.have.all.keys('admin', 'email', 'id', 'name');
+            expect(res.body.name).to.equal('new admin upgrade');
+            expect(res.body.admin).to.equal(true);
+            done();
+          });
+        });
+      });
+
       it('Should prevent non admins from updating personal details of other users', (done) => {
         request(app).put('/api/v1/users/1')
         .send({
@@ -179,31 +235,6 @@ module.exports = () => {
             expect(res.status).to.equal(200);
             expect(res.body).to.have.all.keys('email', 'id', 'name');
             expect(res.body.name).to.equal('asdfg');
-            done();
-          });
-        });
-      });
-
-      it('Should allow admins update personal details of other users', (done) => {
-        request(app).put(`/api/v1/users/${userId}`)
-        .send({
-          token: adminToken,
-          name: 'admin changed name',
-          password: 'new password',
-        })
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body).to.have.property('message');
-          expect(res.body.message).to.include('User Updated');
-
-          request(app).get(`/api/v1/users/${userId}`)
-          .send({
-            token: userToken,
-          })
-          .end((err, res) => {
-            expect(res.status).to.equal(200);
-            expect(res.body).to.have.all.keys('admin', 'email', 'id', 'name');
-            expect(res.body.name).to.equal('admin changed name');
             done();
           });
         });

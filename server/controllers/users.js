@@ -68,7 +68,7 @@ module.exports = {
     }
 
     // Users cannot change their own admin status only other admins can
-    req.body.admin = false;
+    req.body.admin = req.currentUser.admin;
     updateUser(req.currentUser);
   },
   destroy(req, res) {

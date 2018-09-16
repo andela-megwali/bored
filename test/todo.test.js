@@ -39,18 +39,6 @@ module.exports = () => {
       });
     });
 
-    after((done) => {
-      db.User.findOne({
-        where: {
-          email: 'todo@test.com',
-        },
-      })
-      .then(
-        user => user.destroy().then(done()),
-        err => done(err),
-      );
-    });
-
     describe('Create Todo', () => {
       it('Should prevent unauthorized creation of todos', (done) => {
         request(app).post('/api/v1/todos')

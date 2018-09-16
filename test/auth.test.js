@@ -10,18 +10,6 @@ module.exports = () => {
   describe('Signup and login', () => {
     let token;
 
-    after((done) => {
-      db.User.findOne({
-        where: {
-          email: 'auth@test.com',
-        },
-      })
-      .then(
-        user => user.destroy().then(done()),
-        err => done(err),
-      );
-    });
-
     it('Should not create a user when any required field is invalid', (done) => {
       request(app).post('/api/v1/signup')
       .send({
