@@ -42,14 +42,8 @@ module.exports = {
     );
   },
   update(req, res) {
+    const fields = Object.keys(req.body);
     const updateUser = (user) => {
-      const fields = Object.keys(req.body).filter(f => (f !== 'admin' && f !== 'issueId'));
-
-      // Users cannot change their own admin status only other admins can
-      if (req.currentUser.admin && +req.params.userId !== req.currentUser.id) {
-        fields.push('admin');
-      }
-
       if (req.body.password) {
         req.body.password = encryptPassword(req.body.password);
       }
@@ -73,6 +67,8 @@ module.exports = {
       return res.status(403).send({ message: 'Forbidden' });
     }
 
+    // Users cannot change their own admin status only other admins can
+    req.body.admin = false;
     updateUser(req.currentUser);
   },
   destroy(req, res) {
