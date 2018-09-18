@@ -7,7 +7,7 @@ const TodoItemTest = require('./todoItem.test');
 
 describe('Routes and API Actions', () => {
   before('Wipe db', (done) => {
-    // Taking out only user since the other models are cascaded
+    // Takes out only user since the other models are cascaded
     // We'd do this instead if not for cascading
     // Object.keys(db).forEach((key) => {
     //   !['sequelize', 'Sequelize'].includes(key) && db[key].destroy({ where: {}, force: true });
