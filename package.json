@@ -5,11 +5,14 @@
   "repository": "git@github.com:andela-megwali/bored.git",
   "author": "Michael <michael.egwali@andela.com>",
   "license": "MIT",
+  "engines": {
+    "node": "10.9.0"
+  },
   "scripts": {
     "lint:js": "eslint --ext .jsx --ext .js .",
     "pretestLocal": "NODE_ENV=test dropdb --if-exists database_test && NODE_ENV=test createdb database_test",
     "testLocal": "yarn test",
-    "start": "NODE_ENV=production nodemon ./bin/www",
+    "start": "NODE_ENV=production node ./bin/www",
     "start:dev": "NODE_ENV=development sequelize db:migrate && NODE_ENV=development nodemon ./bin/www",
     "test": "yarn lint:js && NODE_ENV=test sequelize db:migrate && NODE_ENV=test PORT=4001 nyc --reporter=text mocha --timeout 5000 --exit"
   },
