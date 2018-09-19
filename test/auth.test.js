@@ -1,4 +1,3 @@
-const db = require('../server/models');
 const app = require('../app');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
@@ -9,6 +8,20 @@ const { expect, request } = chai;
 module.exports = () => {
   describe('Signup and login', () => {
     let token;
+    let adminId;
+
+    before((done) => {
+      // Login as admin user
+      request(app).post('/api/v1/login')
+      .send({
+        email: 'admin@test.com',
+        password: '123qwertyu',
+      })
+      .end((err, res) => {
+        adminId = res.body.user.id;
+        done();
+      });
+    });
 
     it('Should not create a user when any required field is invalid', (done) => {
       request(app).post('/api/v1/signup')
@@ -98,7 +111,7 @@ module.exports = () => {
     });
 
     it('Should not access protected routes without authentication', (done) => {
-      request(app).get('/api/v1/users/1')
+      request(app).get(`/api/v1/users/${adminId}`)
       .end((err, res) => {
         expect(res.status).to.equal(401);
         expect(res.body).to.have.a.property('message');
@@ -108,7 +121,7 @@ module.exports = () => {
     });
 
     it('Should not access protected routes with invalid authentication token', (done) => {
-      request(app).get('/api/v1/users/1')
+      request(app).get(`/api/v1/users/${adminId}`)
       .send({
         token: 'Invalid_token',
       })
@@ -121,7 +134,7 @@ module.exports = () => {
     });
 
     it('Should access protected routes with valid authentication token', (done) => {
-      request(app).get('/api/v1/users/1')
+      request(app).get(`/api/v1/users/${adminId}`)
       .send({
         token,
       })

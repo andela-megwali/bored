@@ -1,4 +1,3 @@
-const db = require('../server/models');
 const app = require('../app');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
@@ -8,6 +7,7 @@ const { expect, request } = chai;
 
 module.exports = () => {
   describe('User CRUD Actions', () => {
+    let adminId;
     let adminToken;
     let userId;
     let userToken;
@@ -31,6 +31,7 @@ module.exports = () => {
           password: '123qwertyu',
         })
         .end((err, res) => {
+          adminId = res.body.user.id;
           adminToken = res.body.token;
           done();
         });
@@ -68,7 +69,7 @@ module.exports = () => {
 
     describe('Retrieving a single user', () => {
       it('Should retrieve another user details without admin field', (done) => {
-        request(app).get('/api/v1/users/1')
+        request(app).get(`/api/v1/users/${adminId}`)
         .send({
           token: userToken,
         })
@@ -217,7 +218,7 @@ module.exports = () => {
       });
 
       it('Should prevent non admins from updating personal details of other users', (done) => {
-        request(app).put('/api/v1/users/1')
+        request(app).put(`/api/v1/users/${adminId}`)
         .send({
           token: userToken,
           name: 'messed up name',
@@ -227,7 +228,7 @@ module.exports = () => {
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.include('Forbidden');
 
-          request(app).get('/api/v1/users/1')
+          request(app).get(`/api/v1/users/${adminId}`)
           .send({
             token: userToken,
           })
@@ -258,7 +259,7 @@ module.exports = () => {
 
     describe('Deleting a user', () => {
       it('Should disallow deletion of a user by other non admin users', (done) => {
-        request(app).delete('/api/v1/users/1')
+        request(app).delete(`/api/v1/users/${adminId}`)
         .send({
           token: userToken,
         })
@@ -360,7 +361,7 @@ module.exports = () => {
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.include('Logout successful');
 
-          request(app).get('/api/v1/users/1')
+          request(app).get(`/api/v1/users/${adminId}`)
           .send({
             token: userToken,
           })
@@ -394,7 +395,7 @@ module.exports = () => {
               expect(res.body).to.have.property('message');
               expect(res.body.message).to.include(`Logout of user ${loggedOutUserId} successful`);
 
-              request(app).get('/api/v1/users/1')
+              request(app).get(`/api/v1/users/${adminId}`)
               .send({
                 token: loggedOutUserToken,
               })
@@ -440,7 +441,7 @@ module.exports = () => {
               expect(res.body).to.have.property('message');
               expect(res.body.message).to.include('Logout successful');
 
-              request(app).get('/api/v1/users/1')
+              request(app).get(`/api/v1/users/${adminId}`)
               .send({
                 token: loggedOutUserToken,
               })

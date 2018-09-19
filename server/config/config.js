@@ -16,6 +16,7 @@ module.exports = {
     'host': process.env.TEST_HOST,
     'dialect': process.env.TEST_DIALECT,
     'secret': process.env.TEST_SECRET,
+    'url': process.env.TEST_DB_URL,
   },
   'production': {
     'username': process.env.PROD_DB_USERNAME,
