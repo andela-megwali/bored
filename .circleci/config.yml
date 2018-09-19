@@ -20,9 +20,6 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       - run:
-          name: Wait for Postgres to start
-          command: dockerize -wait tcp://packy.db.elephantsql.com:5432 -timeout 1m
-      - run:
           name: Run Tests
           command: |
             yarn test

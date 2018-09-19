@@ -61,7 +61,6 @@ module.exports = () => {
           expect(res.status).to.equal(200);
           expect(res.body).to.be.an('array');
           expect(res.body[0]).to.have.all.keys('admin', 'createdAt', 'email', 'id', 'name', 'updatedAt');
-          expect(res.body[0].email).to.equal('admin@test.com');
           done();
         });
       });
