@@ -1,63 +1,25 @@
-const { Todo, TodoItem } = require('../models');
-
-const verifyAndProcessRequest = (req, res, processRequest, successAction) => Todo
-  .findById(req.params.todoId)
-  .then(
-    (todo) => {
-      if (!todo || (todo.userId !== req.currentUser.id && !req.currentUser.admin)) {
-        return res.status(403).send({ message: 'Forbidden' });
-      }
-
-      return processRequest(todo, req, res, successAction);
-    },
-    err => res.status(400).send(err),
-  );
-
-const processRequest = (todo, req, res, successAction) => TodoItem
-  .findOne({
-    where: {
-      todoId: todo.id,
-      id: req.params.todoItemId,
-    },
-  })
-  .then(
-    (todoItem) => {
-      if (!todoItem) {
-        return res.status(404).send({ message: 'Not found' });
-      }
-
-      return successAction(todoItem);
-    },
-    err => res.status(400).send(err),
-  );
+const { TodoItem } = require('../models');
 
 module.exports = {
   create(req, res) {
-    const createTodoItem = todo => TodoItem
+    TodoItem
       .create({
         content: req.body.content,
-        todoId: todo.id,
+        todoId: req.todo.id,
       })
       .then(todoItem => res.status(201).send(todoItem), err => res.status(400).send(err));
-
-    verifyAndProcessRequest(req, res, createTodoItem);
   },
   retrieve(req, res) {
-    const sendTodoItem = todoItem => res.status(200).send(todoItem);
-    verifyAndProcessRequest(req, res, processRequest, sendTodoItem);
+    return res.status(200).send(req.todoItem);
   },
   update(req, res) {
-    const updateTodoItem = todoItem => todoItem
+    return req.todoItem
       .update(req.body, { fields: Object.keys(req.body) })
-      .then(() => res.status(200).send(todoItem), err => res.status(400).send(err));
-
-    verifyAndProcessRequest(req, res, processRequest, updateTodoItem);
+      .then(() => res.status(200).send(req.todoItem), err => res.status(400).send(err));
   },
   destroy(req, res) {
-    const destroyTodoItem = todoItem => todoItem
+    return req.todoItem
       .destroy()
       .then(() => res.status(204).send(), err => res.status(400).send(err));
-
-    verifyAndProcessRequest(req, res, processRequest, destroyTodoItem);
   },
 };
