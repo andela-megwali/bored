@@ -1,5 +1,4 @@
-const { TodoItem } = require('../models');
-const { Todo } = require('../models');
+const { Todo, TodoItem } = require('../models');
 
 const verifyAndProcessRequest = (req, res, processRequest, successAction) => Todo
   .findById(req.params.todoId)

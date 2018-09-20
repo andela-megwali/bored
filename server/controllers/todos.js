@@ -1,5 +1,4 @@
-const { Todo } = require('../models');
-const { TodoItem } = require('../models');
+const { Todo, TodoItem } = require('../models');
 
 const checkActionPermission = (todo, req, res) => {
   if (!todo) {
