@@ -1,0 +1,10 @@
+{
+    "extends": "airbnb",
+    "rules": {
+        "arrow-parens": ["warn", "as-needed", { "requireForBlockBody": true }],
+        "consistent-return": ["off", { "treatUndefinedAsUnspecified": true }],
+        "indent": ["error", 2, { "MemberExpression": "off" }],
+        "object-curly-newline": ["error", { "consistent": true }],
+        "quote-props": ["warn", "consistent"]
+    }
+}
